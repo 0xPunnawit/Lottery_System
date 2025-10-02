@@ -1,0 +1,16 @@
+services:
+  postgres-db:
+    image: postgres:latest
+    container_name: System_lottery
+    restart: no
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - System_lottery_data:/var/lib/postgresql/data
+
+volumes:
+  System_lottery_data:

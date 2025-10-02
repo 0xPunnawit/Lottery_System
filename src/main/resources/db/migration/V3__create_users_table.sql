@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS lottery_schema.users (
+    user_id VARCHAR(10) PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    fullname VARCHAR(100) NOT NULL,
+    phone VARCHAR(10) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role VARCHAR(10) DEFAULT 'USER' -- กำหนด role default เป็น USER
+);

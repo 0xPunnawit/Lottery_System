@@ -5,6 +5,7 @@ import com.punnawit.Lottery_System.entity.Users;
 import com.punnawit.Lottery_System.mapper.UserMapper;
 import com.punnawit.Lottery_System.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,7 +15,7 @@ public class AuthBusiness {
     private final AuthService authService;
     private final UserMapper userMapper;
 
-    public String register(UserRegisterRequest request) {
+    public String register(UserRegisterRequest request) throws BadRequestException {
         Users user = authService.register(request);
 
         return "Register Success";

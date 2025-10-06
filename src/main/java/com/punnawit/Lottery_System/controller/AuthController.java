@@ -4,6 +4,8 @@ import com.punnawit.Lottery_System.business.AuthBusiness;
 import com.punnawit.Lottery_System.dto.request.UserRegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,14 +20,19 @@ public class AuthController {
 
     private  final AuthBusiness authBusiness;
 
+    // Register
     @PostMapping("/register")
     public ResponseEntity<String> register(
             @Valid @RequestBody UserRegisterRequest request
-    ) {
+    ) throws BadRequestException {
         String register = authBusiness.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Register Success");
-
     }
+
+
+
+
+
 
 }

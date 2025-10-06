@@ -1,6 +1,7 @@
 package com.punnawit.Lottery_System.controller;
 
 import com.punnawit.Lottery_System.business.AuthBusiness;
+import com.punnawit.Lottery_System.dto.request.UserLoginRequest;
 import com.punnawit.Lottery_System.dto.request.UserRegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,19 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(
             @Valid @RequestBody UserRegisterRequest request
-    ) throws BadRequestException {
+) throws BadRequestException {
         String register = authBusiness.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Register Success");
+    }
+
+    // Login
+    @PostMapping("/login")
+    public ResponseEntity<String> login (
+            @Valid @RequestBody UserLoginRequest request
+            ) {
+        String login = authBusiness.login(request);
+        return ResponseEntity.ok(login);
     }
 
 

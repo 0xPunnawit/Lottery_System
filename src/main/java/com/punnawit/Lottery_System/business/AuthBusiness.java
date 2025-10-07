@@ -6,6 +6,7 @@ import com.punnawit.Lottery_System.entity.Users;
 import com.punnawit.Lottery_System.exception.LoginException;
 import com.punnawit.Lottery_System.mapper.UserMapper;
 import com.punnawit.Lottery_System.service.AuthService;
+import com.punnawit.Lottery_System.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -20,6 +21,7 @@ public class AuthBusiness {
 
     private final AuthService authService;
     private final UserMapper userMapper;
+    private final TokenUtil tokenUtil;
 
     // Register
     public String register(UserRegisterRequest request) throws BadRequestException {
@@ -42,9 +44,8 @@ public class AuthBusiness {
             log.error("Password not match");
             throw new LoginException("Invalid email or password");
         }
+        String jwtToken = tokenUtil.generateToken(users);
 
-        return "JWT";
-
-
+        return jwtToken;
     }
 }

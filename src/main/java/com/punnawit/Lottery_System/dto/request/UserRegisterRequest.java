@@ -13,12 +13,14 @@ import lombok.Setter;
 public class UserRegisterRequest {
 
     @Email(message = "Invalid email format")
+    @NotBlank(message = "Email cannot be blank")
     private String email;
 
     @NotBlank
     @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
     private String password;
 
+    @NotBlank(message = "Full name cannot be blank")
     @Size(min = 3, max = 100, message = "Full name must be between 3 and 100 characters")
     private String fullName;
 

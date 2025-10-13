@@ -1,6 +1,7 @@
 package com.punnawit.Lottery_System.exception;
 
 import com.punnawit.Lottery_System.dto.response.ErrorResponse;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -8,81 +9,93 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handle 400 Bad Request - Validation errors
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        StringBuilder errors = new StringBuilder();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
-        }
-        // ส่ง ErrorResponse พร้อมสถานะ 400 (Bad Request)
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                errors.toString()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    // Handle 400 Bad Request - BadRequestException
+    // Handle BadRequestException (ข้อมูลไม่ครบ หรือข้อมูลไม่ถูกต้อง)
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
-        // ส่ง ErrorResponse พร้อมสถานะ 400 (Bad Request)
         ErrorResponse errorResponse = new ErrorResponse(
+                "BAD_REQUEST",
+                ex.getMessage(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                ex.getMessage()
+                System.currentTimeMillis()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Handle 401 Unauthorized
-    @ExceptionHandler(LoginException.class)
-    public ResponseEntity<ErrorResponse> handleLoginException(LoginException ex) {
+    // Handle MethodArgumentNotValidException (กรณีข้อมูลไม่ถูกต้องตามการตรวจสอบจาก @Valid)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle Duplicate Data (ข้อมูลซ้ำ)
+    @ExceptionHandler(DuplicateDataException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateData(DuplicateDataException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
+                "CONFLICT",
+                ex.getMessage(),
+                HttpStatus.CONFLICT.value(),
+                System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    // Handle UnauthorizedException (ไม่ได้ล็อกอิน)
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "UNAUTHORIZED",
+                ex.getMessage(),
                 HttpStatus.UNAUTHORIZED.value(),
-                "Unauthorized",
-                ex.getMessage()
+                System.currentTimeMillis()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    // Handle 403 Forbidden
+    // Handle ForbiddenException (ไม่มีสิทธิ์เข้าถึง)
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex) {
-        // ส่ง ErrorResponse พร้อมสถานะ 403 (Forbidden)
         ErrorResponse errorResponse = new ErrorResponse(
+                "FORBIDDEN",
+                ex.getMessage(),
                 HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
-                "You do not have permission to access this resource");
+                System.currentTimeMillis()
+        );
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
-    // Handle 404 Not Found
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex) {
-        // ส่ง ErrorResponse พร้อมสถานะ 404 (Not Found)
+    // Handle InternalServerErrorException (ข้อผิดพลาดภายในเซิร์ฟเวอร์)
+    @ExceptionHandler(InternalServerErrorException.class)
+    public ResponseEntity<ErrorResponse> handleInternalServerError(InternalServerErrorException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
-
-    // Handle 500 Internal Server Error
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleInternalServerError(Exception ex) {
-        // ส่ง ErrorResponse พร้อมสถานะ 500 (Internal Server Error)
-        ErrorResponse errorResponse = new ErrorResponse(
+                "INTERNAL_SERVER_ERROR",
+                ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                "An unexpected error occurred"
+                System.currentTimeMillis()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // Handle Generic Exception (ข้อผิดพลาดทั่วไป)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "INTERNAL_SERVER_ERROR",
+                "An unexpected error occurred. Please try again later.",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

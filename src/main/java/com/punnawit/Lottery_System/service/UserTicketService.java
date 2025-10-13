@@ -1,5 +1,6 @@
 package com.punnawit.Lottery_System.service;
 
+import com.punnawit.Lottery_System.dto.response.LotteryPurchaseHistoryResponse;
 import com.punnawit.Lottery_System.dto.response.LotteryPurchaseResponse;
 import com.punnawit.Lottery_System.entity.Lottery;
 import com.punnawit.Lottery_System.entity.UserTicket;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -72,14 +75,36 @@ public class UserTicketService {
         // คำนวณราคาทั้งหมดที่ต้องจ่าย (amount * price)
         BigDecimal totalPrice = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(lottery.getPrice()));
 
-        // ส่ง response กลับ พร้อมราคาที่ต้องจ่าย
+        // ส่ง response กลับ พร้อมจำนวนที่ซื้อ
         return new LotteryPurchaseResponse(
                 lottery.getTicketId(),
                 lottery.getPrice(),
-                lottery.getAmount(),
+                amount,
                 totalPrice,
                 "Purchase successful"
         );
     }
 
+    public List<LotteryPurchaseHistoryResponse> getUserPurchasedLotteries() {
+        // ดึง userId จาก SecurityContext (JWT token)
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<Users> byId = userRepository.findById(userId);
+        if (byId.isEmpty()) {
+            throw new ResourceNotFoundException("User not found");
+        }
+        Users userById = byId.get();
+
+        List<UserTicket> userTickets = userTicketRepository.findByUsers(userById);
+
+        return userTickets.stream().map(userTicket -> {
+            return new LotteryPurchaseHistoryResponse(
+                    userTicket.getUserTicketId(),
+                    userTicket.getLottery().getTicketId(),
+                    userTicket.getLottery().getPrice(),
+                    userTicket.getAmount(),
+                    userTicket.getPurchaseDate()
+            );
+        }).collect(Collectors.toList());
+    }
 }

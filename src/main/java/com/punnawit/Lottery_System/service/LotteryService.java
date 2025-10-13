@@ -6,6 +6,7 @@ import com.punnawit.Lottery_System.repository.LotteryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,6 +32,11 @@ public class LotteryService {
             lottery.setAmount(request.getAmount());
             lotteryRepository.save(lottery);
         }
-
     }
+
+    public List<Lottery> getAllLotteries() {
+        return lotteryRepository.findAll();
+    }
+
+
 }

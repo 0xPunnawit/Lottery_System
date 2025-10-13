@@ -1,94 +1,96 @@
 package com.punnawit.Lottery_System.exception;
 
 import com.punnawit.Lottery_System.dto.response.ErrorResponse;
-import org.springframework.security.access.AccessDeniedException;
-import org.apache.coyote.BadRequestException;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@ControllerAdvice
-public class GlobalExceptionHandler {
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // Handle BadRequestException (ข้อมูลไม่ครบ หรือข้อมูลไม่ถูกต้อง)
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
                 "BAD_REQUEST",
                 ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value()
+                request.getRequestURI()  // ใช้ path ที่ถูกต้อง
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Handle MethodArgumentNotValidException (กรณีข้อมูลไม่ถูกต้องตามการตรวจสอบจาก @Valid)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
-    // Handle Duplicate Data (ข้อมูลซ้ำ)
-    @ExceptionHandler(DuplicateDataException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateData(DuplicateDataException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                "CONFLICT",
-                ex.getMessage(),
-                HttpStatus.CONFLICT.value()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
-
-    // Handle UnauthorizedException (ไม่ได้ล็อกอิน)
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
+    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
                 "UNAUTHORIZED",
-                "You need to log in to access this resource.",
-                HttpStatus.UNAUTHORIZED.value()
+                ex.getMessage(),
+                request.getRequestURI()  // ใช้ path ที่ถูกต้อง
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    // Handle ForbiddenException (ไม่มีสิทธิ์เข้าถึง)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+    @ExceptionHandler(DuplicateDataException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateData(DuplicateDataException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
-                "FORBIDDEN",
-                "You do not have permission to access this resource.",
-                HttpStatus.FORBIDDEN.value()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
-    }
-    // Handle InternalServerErrorException (ข้อผิดพลาดภายในเซิร์ฟเวอร์)
-    @ExceptionHandler(InternalServerErrorException.class)
-    public ResponseEntity<ErrorResponse> handleInternalServerError(InternalServerErrorException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                "INTERNAL_SERVER_ERROR",
+                HttpStatus.CONFLICT.value(),
+                "CONFLICT",
                 ex.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
+                request.getRequestURI()  // ใช้ path ที่ถูกต้อง
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    // Handle Generic Exception (ข้อผิดพลาดทั่วไป)
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()  // ใช้ path ที่ถูกต้อง
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<String> validationErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.toList());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "VALIDATION_FAILED",
+                "Input validation failed",
+                request.getContextPath(), // ใช้ path ที่ถูกต้อง
+                validationErrors
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception ex, HttpServletRequest request) {
+        log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "INTERNAL_SERVER_ERROR",
-                "An unexpected error occurred. Please try again later.",
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
+                "An unexpected internal server error has occurred.",
+                request.getRequestURI()  // ใช้ path ที่ถูกต้อง
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -3,11 +3,13 @@ package com.punnawit.Lottery_System.dto.response;
 
 import com.punnawit.Lottery_System.entity.Lottery;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class LotteryResponse {
 

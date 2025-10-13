@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class UserTicket {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_ticket_id")
     private Long userTicketId;
 
@@ -26,4 +27,7 @@ public class UserTicket {
 
     @Column(name = "purchase_date", nullable = false)
     private LocalDateTime purchaseDate;
+
+    @Column(name = "amount", nullable = false)
+    private int amount;
 }

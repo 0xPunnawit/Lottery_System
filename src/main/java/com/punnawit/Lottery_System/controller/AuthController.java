@@ -1,9 +1,11 @@
 package com.punnawit.Lottery_System.controller;
 
 import com.punnawit.Lottery_System.business.AuthBusiness;
+import com.punnawit.Lottery_System.dto.request.UserLoginRequest;
 import com.punnawit.Lottery_System.dto.request.UserRegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +23,14 @@ public class AuthController {
     public ResponseEntity<String> register(@Valid @RequestBody UserRegisterRequest request) {
         String register = authBusiness.register(request);
 
-        return ResponseEntity.ok(register);
+        return ResponseEntity.status(HttpStatus.CREATED).body(register);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@Valid @RequestBody UserLoginRequest request) {
+        String login = authBusiness.login(request);
+
+        return ResponseEntity.ok(login);
     }
 
 

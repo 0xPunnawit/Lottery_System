@@ -21,8 +21,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 "BAD_REQUEST",
                 ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                System.currentTimeMillis()
+                HttpStatus.BAD_REQUEST.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -39,14 +38,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+
     // Handle Duplicate Data (ข้อมูลซ้ำ)
     @ExceptionHandler(DuplicateDataException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateData(DuplicateDataException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 "CONFLICT",
                 ex.getMessage(),
-                HttpStatus.CONFLICT.value(),
-                System.currentTimeMillis()
+                HttpStatus.CONFLICT.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
@@ -57,8 +56,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 "UNAUTHORIZED",
                 ex.getMessage(),
-                HttpStatus.UNAUTHORIZED.value(),
-                System.currentTimeMillis()
+                HttpStatus.UNAUTHORIZED.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
@@ -69,8 +67,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 "FORBIDDEN",
                 ex.getMessage(),
-                HttpStatus.FORBIDDEN.value(),
-                System.currentTimeMillis()
+                HttpStatus.FORBIDDEN.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
@@ -81,8 +78,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
                 ex.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                System.currentTimeMillis()
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -93,8 +89,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
                 "An unexpected error occurred. Please try again later.",
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                System.currentTimeMillis()
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

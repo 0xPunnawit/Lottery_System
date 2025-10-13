@@ -1,6 +1,7 @@
 package com.punnawit.Lottery_System.exception;
 
 import com.punnawit.Lottery_System.dto.response.ErrorResponse;
+import org.springframework.security.access.AccessDeniedException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-
     // Handle Duplicate Data (ข้อมูลซ้ำ)
     @ExceptionHandler(DuplicateDataException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateData(DuplicateDataException ex) {
@@ -55,23 +55,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 "UNAUTHORIZED",
-                ex.getMessage(),
+                "You need to log in to access this resource.",
                 HttpStatus.UNAUTHORIZED.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     // Handle ForbiddenException (ไม่มีสิทธิ์เข้าถึง)
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 "FORBIDDEN",
-                ex.getMessage(),
+                "You do not have permission to access this resource.",
                 HttpStatus.FORBIDDEN.value()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
-
     // Handle InternalServerErrorException (ข้อผิดพลาดภายในเซิร์ฟเวอร์)
     @ExceptionHandler(InternalServerErrorException.class)
     public ResponseEntity<ErrorResponse> handleInternalServerError(InternalServerErrorException ex) {

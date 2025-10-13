@@ -1,6 +1,7 @@
 package com.punnawit.Lottery_System.config;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.punnawit.Lottery_System.exception.UnauthorizedException;
 import com.punnawit.Lottery_System.util.TokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -54,15 +55,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 } else {
                     // Clear SecurityContext if the token is invalid or expired
-                    SecurityContextHolder.clearContext();
-                    filterChain.doFilter(request, response);
-                    return;
+                    throw new UnauthorizedException("Invalid or expired token");
                 }
             } catch (Exception e) {
                 // Handle cases where token verification fails
-                SecurityContextHolder.clearContext();  // Clear context in case of exception
-                filterChain.doFilter(request, response);
-                return;
+                throw new UnauthorizedException("Invalid or expired token");
             }
         }
         // Pass the request to the next filter

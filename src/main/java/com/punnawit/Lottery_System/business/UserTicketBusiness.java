@@ -22,4 +22,9 @@ public class UserTicketBusiness {
     public List<LotteryPurchaseHistoryResponse> getUserPurchasedLotteries() {
         return userTicketService.getUserPurchasedLotteries();
     }
+
+    public String cancelLotteryPurchase(String ticketId, LotteryPurchaseRequest request) {
+        return userTicketService.cancelLotteryPurchase(ticketId, request.getAmount());
+    }
+
 }

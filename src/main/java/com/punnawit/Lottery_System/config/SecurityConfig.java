@@ -28,6 +28,8 @@ public class SecurityConfig {
             // เพิ่ม URL
             "/v3/api-docs/**",
             "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/webjars/**",
             "/swagger-ui.html"
     };
 

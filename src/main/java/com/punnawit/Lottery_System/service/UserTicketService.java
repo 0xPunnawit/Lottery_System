@@ -107,4 +107,47 @@ public class UserTicketService {
             );
         }).collect(Collectors.toList());
     }
+
+    @Transactional
+    public String cancelLotteryPurchase(String ticketId, int amount) {
+        // Fetch userId from SecurityContext (JWT token)
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Check if user exists
+        Optional<Users> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        // Find the lottery by ticketId
+        Optional<Lottery> lotteryOpt = lotteryRepository.findByTicketId(ticketId);
+        if (lotteryOpt.isEmpty()) {
+            throw new ResourceNotFoundException("Lottery not found");
+        }
+
+        Lottery lottery = lotteryOpt.get();
+        // Find the user's ticket purchase
+        Optional<UserTicket> userTicketOpt = userTicketRepository.findByUsersAndLottery(userOpt.get(), lottery);
+        if (userTicketOpt.isEmpty()) {
+            throw new ResourceNotFoundException("Purchase not found");
+        }
+
+        UserTicket userTicket = userTicketOpt.get();
+
+        // Ensure the user is not returning more tickets than they bought
+        if (userTicket.getAmount() < amount) {
+            throw new IllegalArgumentException("You are attempting to return more tickets than you purchased.");
+        }
+
+        // Decrease the number of tickets purchased by the user
+        userTicket.setAmount(userTicket.getAmount() - amount);
+        userTicketRepository.save(userTicket);
+
+        // Increase the stock of tickets in the lottery
+        lottery.setAmount(lottery.getAmount() + amount);
+        lotteryRepository.save(lottery);
+
+        return "Purchase cancelled and tickets returned to the lottery stock.";
+    }
+
 }

@@ -5,6 +5,7 @@ import com.punnawit.Lottery_System.dto.response.LotteryPurchaseResponse;
 import com.punnawit.Lottery_System.entity.Lottery;
 import com.punnawit.Lottery_System.entity.UserTicket;
 import com.punnawit.Lottery_System.entity.Users;
+import com.punnawit.Lottery_System.exception.BadRequestException;
 import com.punnawit.Lottery_System.exception.ResourceNotFoundException;
 import com.punnawit.Lottery_System.repository.LotteryRepository;
 import com.punnawit.Lottery_System.repository.UserRepository;
@@ -110,23 +111,19 @@ public class UserTicketService {
 
     @Transactional
     public String cancelLotteryPurchase(String ticketId, int amount) {
-        // Fetch userId from SecurityContext (JWT token)
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        // Check if user exists
         Optional<Users> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
             throw new ResourceNotFoundException("User not found");
         }
 
-        // Find the lottery by ticketId
         Optional<Lottery> lotteryOpt = lotteryRepository.findByTicketId(ticketId);
         if (lotteryOpt.isEmpty()) {
             throw new ResourceNotFoundException("Lottery not found");
         }
 
         Lottery lottery = lotteryOpt.get();
-        // Find the user's ticket purchase
         Optional<UserTicket> userTicketOpt = userTicketRepository.findByUsersAndLottery(userOpt.get(), lottery);
         if (userTicketOpt.isEmpty()) {
             throw new ResourceNotFoundException("Purchase not found");
@@ -134,20 +131,20 @@ public class UserTicketService {
 
         UserTicket userTicket = userTicketOpt.get();
 
-        // Ensure the user is not returning more tickets than they bought
-        if (userTicket.getAmount() < amount) {
-            throw new IllegalArgumentException("You are attempting to return more tickets than you purchased.");
+        if (amount <= 0) {
+            throw new BadRequestException("The amount to return cannot be zero or negative.");
         }
 
-        // Decrease the number of tickets purchased by the user
+        if (userTicket.getAmount() < amount) {
+            throw new BadRequestException("You are attempting to return more tickets than you purchased.");
+        }
+
         userTicket.setAmount(userTicket.getAmount() - amount);
         userTicketRepository.save(userTicket);
 
-        // Increase the stock of tickets in the lottery
         lottery.setAmount(lottery.getAmount() + amount);
         lotteryRepository.save(lottery);
 
         return "Purchase cancelled and tickets returned to the lottery stock.";
     }
-
 }

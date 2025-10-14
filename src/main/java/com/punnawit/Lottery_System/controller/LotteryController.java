@@ -2,11 +2,13 @@ package com.punnawit.Lottery_System.controller;
 
 import com.punnawit.Lottery_System.business.LotteryBusiness;
 import com.punnawit.Lottery_System.business.UserTicketBusiness;
+import com.punnawit.Lottery_System.dto.request.CancelLotteryRequest;
 import com.punnawit.Lottery_System.dto.request.LotteryPurchaseRequest;
 import com.punnawit.Lottery_System.dto.response.LotteryPurchaseHistoryResponse;
 import com.punnawit.Lottery_System.dto.response.LotteryPurchaseResponse;
 import com.punnawit.Lottery_System.dto.response.LotteryResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,12 +53,10 @@ public class LotteryController {
     @Operation(summary = "Cancel purchase and return lottery", description = "Cancel the purchased lottery and return the tickets to the lottery stock.")
     public ResponseEntity<String> cancelLotteryPurchase(
             @PathVariable String ticketId,
-            @RequestBody LotteryPurchaseRequest request
+            @Valid @RequestBody CancelLotteryRequest request
     ) {
-        // Call business logic to handle cancellation and return tickets
         String response = userTicketBusiness.cancelLotteryPurchase(ticketId, request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
 
 }

@@ -6,9 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LotteryPurchaseRequest {
+public class CancelLotteryRequest {
 
     @Min(value = 1, message = "Amount must be greater than zero")
     private int amount;
-
 }

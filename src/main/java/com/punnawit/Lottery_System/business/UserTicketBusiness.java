@@ -1,5 +1,6 @@
 package com.punnawit.Lottery_System.business;
 
+import com.punnawit.Lottery_System.dto.request.CancelLotteryRequest;
 import com.punnawit.Lottery_System.dto.request.LotteryPurchaseRequest;
 import com.punnawit.Lottery_System.dto.response.LotteryPurchaseHistoryResponse;
 import com.punnawit.Lottery_System.dto.response.LotteryPurchaseResponse;
@@ -23,7 +24,7 @@ public class UserTicketBusiness {
         return userTicketService.getUserPurchasedLotteries();
     }
 
-    public String cancelLotteryPurchase(String ticketId, LotteryPurchaseRequest request) {
+    public String cancelLotteryPurchase(String ticketId, CancelLotteryRequest request) {
         return userTicketService.cancelLotteryPurchase(ticketId, request.getAmount());
     }
 
